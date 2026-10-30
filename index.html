@@ -4115,7 +4115,7 @@ function setPhTab(t) {
   (t === "lib" ? $("#phLib") : $("#phCol")).scrollTop = 0;
 }
 function renderGallery() {
-  const all = C.GALLERY_IMAGES.map(g => Object.assign({}, g, { _src: g, locked: isLocked(g) }));
+  const all = C.GALLERY_IMAGES.filter(g => !isLocked(g)).map(g => Object.assign({}, g, { _src: g, locked: false }));   // 🔒 아직 안 받은 사진은 아예 안 보임 (받으면 그때 생김)
   const albums = [...new Set(all.map(g => g.album).filter(Boolean))];
   if (S.album !== "전체" && S.album !== "즐겨찾기" && !albums.includes(S.album)) S.album = "전체";
   const inAlbum = S.album !== "전체";
