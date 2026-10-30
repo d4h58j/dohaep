@@ -110,7 +110,7 @@ const CONFIG = {
     center: true,               // 알림을 '알림 센터' 아래에 모아서 보여줌
     notifications: [            // 잠금화면 알림 (위가 최신) — app: "calendar" 면 아이폰 캘린더 아이콘
       { app: "calendar", tag: "긴급", title: "1교시 (형 깨우기)", text: "오늘 09:00", time: "48분 후" },   // 📅 캘린더 알림 (tag: 제목 위 회색 글씨 / time: 일정까지 남은 시간)
-      { app: "kakao", person: "partner", title: "똥강아지", text: "어 잘 자", time: "8시간 전" },
+      { app: "kakao", person: "partner", title: "똥강아지", text: "어 잘 자~", time: "8시간 전" },
     ],
   },
 
@@ -269,7 +269,7 @@ const CONFIG = {
         { sender: "partner", text: "아 진짜라고", time: "00:06" },
         { sender: "user", text: "알겠어…", time: "00:08" },
         { sender: "user", text: "내일봐예에에에", time: "00:08" },
-        { sender: "partner", text: "어 잘 자", time: "00:08" },
+        { sender: "partner", text: "어 잘 자~", time: "00:08" },
       ],
     },
   },
@@ -2001,8 +2001,14 @@ img.app-ico{object-fit:cover;background:#fff}
 
 /* 🔒 잠금화면 알림: 실제 아이폰 스크린샷 비율 그대로 (카드 폭 378px 기준) */
 #lock .notif.glass-card{gap:13.5px;align-items:center;padding:10.5px 18px 13.5px 13.5px;border-radius:22px;color:#0a080b;
-  background:linear-gradient(180deg,rgb(123,118,124),rgb(129,124,130))!important;box-shadow:inset 0 0 0 .7px rgba(255,255,255,.26),inset 0 1px 0 rgba(255,255,255,.12),0 4px 16px rgba(0,0,0,.12);-webkit-backdrop-filter:none;backdrop-filter:none}
+  background:linear-gradient(180deg,rgb(182,175,193),rgb(169,163,181))!important;box-shadow:inset 0 0 0 .7px rgba(255,255,255,.34),inset 0 1px 0 rgba(255,255,255,.22),0 4px 16px rgba(0,0,0,.14);-webkit-backdrop-filter:none;backdrop-filter:none}
 #lock .notif .n-body{line-height:14.5px}
+#lock .notif.glass-card + .notif.glass-card{margin-top:-1px}
+#lock .nc-list{gap:9px}
+#lock .nc-x{background:linear-gradient(180deg,rgb(188,182,201),rgb(178,172,191))!important;color:#000;box-shadow:inset 0 0 0 .7px rgba(255,255,255,.35),0 3px 10px rgba(0,0,0,.12)}
+#lock .lock-btn{background:linear-gradient(180deg,rgb(170,165,183),rgb(158,153,171))!important;box-shadow:inset 0 0 0 .7px rgba(255,255,255,.35),inset 0 1px 0 rgba(255,255,255,.25),0 4px 14px rgba(0,0,0,.16)}
+#lock .lock-btn[data-lb="light"]{color:#fff}
+#lock .lock-btn[data-lb="cam"]{color:#111}
 #lock .notif .n-top{align-items:flex-start}
 #lock .notif .n-top b{font-size:13px;font-weight:600;color:#0a080b;line-height:14.5px}
 #lock .notif .n-top small{font-size:13px;color:rgb(58,53,59);line-height:14.5px}
