@@ -50,7 +50,8 @@ const CONFIG = {
 
   SETTINGS: {
     startScene: "start",                // 첫 장면 id (아래 STORY의 키)
-    typingSpeed: 1,                     // 1 = 보통, 0.5 = 2배 빠르게, 1.5 = 느리게
+    typingSpeed: 1,                     // 1 = 보통, 0.5 = 2배 빠르게, 1.5 = 느리게 (전체 속도)
+    chatPace: 1.3,                      // 💬 대화 말풍선만 느리게/빠르게 (1.3 = 30% 천천히 · 장면 사이 대기 시간은 그대로)
     showThoughts: true,                 // 지훈 속마음(💭) 보이기
     endingCard: false,                  // 🌍 false = 엔딩 카드 없이 폰이 그대로 이어짐 (오픈월드) / true = 마지막 카드 띄우기
   },
@@ -318,7 +319,7 @@ const CONFIG = {
     },
 
     wake_sms: {
-      room: "sms", wait: 3,
+      room: "sms", wait: 4,
       quiet: true,                     // 알림 없이 → 메시지 앱에서 형 문자방 들어가면 시작
       messages: [
         { type: "choice", options: [
@@ -343,7 +344,7 @@ const CONFIG = {
 
     /* ── 📱 08:40 형한테 문자 옴 ── */
     wake_sms3: {
-      room: "sms", wait: 20,
+      room: "sms", wait: 21,
       messages: [
         { sender: "partner", text: "지훈", time: "08:40", typing: 3 },
         { sender: "partner", text: "어디야?", time: "08:40" },
@@ -366,7 +367,7 @@ const CONFIG = {
 
     /* ── ☕ 형 지각 + 아샷추 ── */
     morning: {
-      room: "dm", wait: 20,
+      room: "dm", wait: 21,
       messages: [
         { sender: "partner", type: "image", url: "img:coffee", text: "", time: "09:08" },
         { sender: "partner", text: "😎", time: "09:08" },
@@ -417,7 +418,7 @@ const CONFIG = {
 
     /* ── 📡 1교시 중: 형이 에어드롭으로 사진 4장 ── */
     airdrop: {
-      wait: 20, at: "10:21",
+      wait: 21, at: "10:21",
       airdrop: { from: "김도훈의 iPhone", count: 4, images: ["img:g1", "img:g3", "img:g7"] },   // 수락하면 사진 앱이 열려요
       nextId: "airdrop2",
     },
@@ -438,11 +439,11 @@ const CONFIG = {
       nextId: "s2",
     },
 
-    /* ── 🏫 1교시 끝: 사진 앱·인스타 들어가면 3초 뒤 바로 연락 (그 외 앱이면 25초 뒤 사진 버전) ── */
+    /* ── 🏫 1교시 끝: 사진 앱·인스타에 들어가면 3초 뒤 연락 (안 들어가면 진행 안 됨) ── */
     s2: {
-      room: "dm", wait: 25, at: "10:58",
+      room: "dm", wait: 26, at: "10:58",
       byApp: { photos: "s2_photos", insta: "s2_insta" },   // 👀 그때 보고 있던 앱에 따라 형 말이 달라져요
-      byDefault: "s2_photos",                              // 다른 앱(카톡·홈 등)에 있으면 이 장면
+      byAppOnly: true,                                     // 🔒 사진 앱이나 인스타를 봐야만 연락이 와요 (다른 앱에 있으면 계속 기다림)
     },
     s2_photos: {
       room: "dm", alias: "s2",
@@ -525,7 +526,7 @@ const CONFIG = {
 
     /* ── 🥗 점심 (인스타 부계 디엠) ── */
     lunch: {
-      room: "ig", wait: 25,
+      room: "ig", wait: 26,
       messages: [
         { sender: "partner", text: "지훈", time: "12:31" },
         { sender: "partner", text: "점심 뭐 먹어?", time: "12:31" },
@@ -573,7 +574,7 @@ const CONFIG = {
 
     /* ── 🩰 연습실 (문자) ── */
     practice: {
-      room: "sms", wait: 25,
+      room: "sms", wait: 26,
       messages: [
         { sender: "partner", text: "물 좀 마시면서 해", time: "15:20" },
         { type: "choice", options: [
@@ -603,7 +604,7 @@ const CONFIG = {
 
     /* ── 🍗 정문 찜닭 ── */
     evening: {
-      room: "dm", wait: 25,
+      room: "dm", wait: 26,
       messages: [
         { sender: "partner", text: "정문 도착", time: "17:55" },
         { sender: "partner", text: "5분 줄게", time: "17:55" },
@@ -2973,6 +2974,7 @@ const roomBox = {};
 const scene = id => C.STORY[String(id)];
 const person = key => C.PEOPLE[key] || { name: String(key), avatar: "" };
 const speed = ms => ms * (Number(C.SETTINGS.typingSpeed) || 1) * (S.fast ? 0.25 : 1);
+const chatSp = ms => speed(ms) * (Number(C.SETTINGS.chatPace) || 1);   // 💬 대화 말풍선 속도만 따로 (장면 사이 대기는 그대로)
 const isIncoming = m => !!m.sender && m.sender !== "user" && !["date", "thought", "system", "choice"].includes(m.type);
 const viewingRoom = () => (!S.locked && S.app === "kakao" && S.openRoom) ? S.openRoom : null;
 const isViewing = room => CH[room] ? CH[room].viewing() : viewingRoom() === room;
@@ -3546,13 +3548,13 @@ async function chDeliver(room, m, tok) {
     return;
   }
   if (t === "date" || t === "system") return;
-  if (m.sender === "user") { if (m.delay) { if (m.time) tickClock(m.time, speed(m.delay * 1000), tok); await sleep(speed(m.delay * 1000)); } sendStart(room); await sleep(speed(Math.min(2400, 900 + String(m.text || "").length * 60))); if (tok === S.token) chAdd(room, m); sendEnd(); return; }
+  if (m.sender === "user") { if (m.delay) { if (m.time) tickClock(m.time, speed(m.delay * 1000), tok); await sleep(speed(m.delay * 1000)); } sendStart(room); await sleep(chatSp(Math.min(2400, 900 + String(m.text || "").length * 60))); if (tok === S.token) chAdd(room, m); sendEnd(); return; }
   const typ = chTyping(room);
-  await sleep(speed(m.typing ? Number(m.typing) * 1000 : t === "image" ? 1800 : Math.min(3200, 850 + String(m.text || "").length * 95)));
+  await sleep(chatSp(m.typing ? Number(m.typing) * 1000 : t === "image" ? 1800 : Math.min(3200, 850 + String(m.text || "").length * 95)));
   if (tok !== S.token) { if (typ) typ.remove(); return; }
   chAdd(room, m);                        // '입력 중'은 새 말풍선으로 바로 바뀜 (먼저 지우면 화면이 툭 튐)
   if (typ && typ.isConnected) typ.remove();
-  await sleep(speed(450));
+  await sleep(chatSp(450));
 }
 let thT;
 function thoughtPop(text, ms) {        // 인스타·문자 화면 위에 뜨는 속마음
@@ -3741,7 +3743,7 @@ async function bgArrive(id, sc, room) {
   const tok = S.token, ms = sc.messages;
   for (let k = 0; k < ms.length && isIncoming(ms[k]); k++) {
     const m = ms[k], t = m.type || "text";
-    if (k) await sleep(speed(m.typing ? Number(m.typing) * 1000 : t === "image" ? 1800 : Math.min(3200, 850 + String(m.text || "").length * 95)) + speed(450));
+    if (k) await sleep(chatSp(m.typing ? Number(m.typing) * 1000 : t === "image" ? 1800 : Math.min(3200, 850 + String(m.text || "").length * 95)) + chatSp(450));
     if (tok !== S.token) return;
     if (isViewing(room)) return play(id, k);              // 도착하는 도중에 들어오면 나머지는 그 자리에서
     CH[room] ? chAdd(room, m) : addMsg(room, m);
@@ -3881,13 +3883,13 @@ async function deliver(room, m, tok) {
     await sleep(speed(Math.min(2800, 900 + String(m.text || "").length * 32)));
     return;
   }
-  if (m.sender === "user") { if (m.delay) { if (m.time) tickClock(m.time, speed(m.delay * 1000), tok); await sleep(speed(m.delay * 1000)); } sendStart(room); await sleep(speed(Math.min(2400, 900 + String(m.text || "").length * 60))); if (tok === S.token) addMsg(room, m); sendEnd(); return; }
+  if (m.sender === "user") { if (m.delay) { if (m.time) tickClock(m.time, speed(m.delay * 1000), tok); await sleep(speed(m.delay * 1000)); } sendStart(room); await sleep(chatSp(Math.min(2400, 900 + String(m.text || "").length * 60))); if (tok === S.token) addMsg(room, m); sendEnd(); return; }
   const typ = typingRow(room, m.sender);
-  await sleep(speed(m.typing ? Number(m.typing) * 1000 : t === "image" ? 1800 : Math.min(3200, 850 + String(m.text || "").length * 95)));
+  await sleep(chatSp(m.typing ? Number(m.typing) * 1000 : t === "image" ? 1800 : Math.min(3200, 850 + String(m.text || "").length * 95)));
   typ.remove();
   if (tok !== S.token) return;
   addMsg(room, m);
-  await sleep(speed(450));
+  await sleep(chatSp(450));
 }
 
 function advance(node) {
@@ -3907,7 +3909,7 @@ function later(id) {
   const first = (sc.messages || []).find(m => m.time), tt = sc.at || (first && first.time);
   if (tt) tickClock(tt, ms, tok);
   const W = { id, tok, tt, timer: 0, end: Date.now() + ms };
-  W.timer = setTimeout(() => { if (tok !== S.token) return; if (S.byAppWait === W) { S.byAppWait = null; clearTimeout(S.byAppT); } startScene(id); }, ms);
+  if (!sc.byAppOnly) W.timer = setTimeout(() => { if (tok !== S.token) return; if (S.byAppWait === W) { S.byAppWait = null; clearTimeout(S.byAppT); } startScene(id); }, ms);   // byAppOnly: 그 앱에 들어가야만 진행
   if (sc.byApp) { S.byAppWait = W; if (sc.byApp[S.app]) byAppKick(S.app); }   // 👀 그 앱(사진·인스타 등)에 들어가면 3초 뒤에 바로 연락 옴
 }
 function byAppKick(app) {
@@ -3998,7 +4000,7 @@ function pick(o) {
     const lines = (Array.isArray(say) ? say : [say]).filter(Boolean);   // say: ["줄1", "줄2"] → 말풍선 여러 개
     sendStart(w.room);
     for (let i = 0; i < lines.length; i++) {
-      await sleep(i ? speed(550) : 120); if (tok !== S.token) return sendEnd();
+      await sleep(i ? chatSp(550) : 120); if (tok !== S.token) return sendEnd();
       const um = { sender: "user", text: lines[i], time: o.time || S.clock };
       if (CH[w.room]) chAdd(w.room, um); else addMsg(w.room, um);
     }
