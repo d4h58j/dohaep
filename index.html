@@ -1334,6 +1334,25 @@ img.app-ico{object-fit:cover;background:#fff}
 /* ── 보이스톡 (통화 화면) ── */
 .call{position:absolute;inset:0;z-index:64;display:none;color:#fff;overflow:hidden;background:#20242b}
 .call.on{display:block;animation:fade .25s}
+/* 📱 아이폰 전화 거는 화면 */
+.call.ios2{background:linear-gradient(180deg,#767676 0%,#6c6c6c 45%,#525252 100%)}
+.call.ios2 .i2-in{padding:118px 0 62px;justify-content:flex-start}
+.call.ios2 .i2-state{font-size:17px;font-weight:500;color:rgba(255,255,255,.52);margin:0;min-height:auto;opacity:1;letter-spacing:-.2px}
+.call.ios2.over .i2-state{color:rgba(255,255,255,.52)}
+.i2-name{font-size:33px;font-weight:600;color:#fff;letter-spacing:-.5px;margin-top:6px}
+.i2-grid{margin-top:auto;display:grid;grid-template-columns:repeat(3,82px);column-gap:38px;row-gap:30px}
+.i2-b{display:flex;flex-direction:column;align-items:center;gap:9px;color:#fff}
+.i2-b span{width:82px;height:82px;border-radius:50%;display:grid;place-items:center;color:#fff;
+  background:radial-gradient(120% 120% at 50% 0%,rgba(255,255,255,.16),rgba(255,255,255,.04) 55%),rgba(70,70,70,.55);
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.28),inset 0 1.5px 1px rgba(255,255,255,.28),0 1px 0 rgba(255,255,255,.06);transition:background .15s,color .15s}
+.i2-b span svg{width:34px;height:34px}
+.i2-b.ft span{color:rgba(255,255,255,.55)}
+.i2-b.ft span svg{width:36px;height:28px}
+.i2-b em{font-style:normal;font-size:15px;font-weight:500;letter-spacing:-.2px}
+.i2-b.on span{background:#fff;color:#2b2b2b}
+.i2-b.end span{background:radial-gradient(120% 120% at 50% 0%,rgba(255,255,255,.18),rgba(255,255,255,0) 55%),#d83a2e;box-shadow:inset 0 0 0 1px rgba(0,0,0,.18),inset 0 1.5px 1px rgba(255,255,255,.3)}
+.i2-b.end span svg{width:40px;height:40px}
+.call.ios2.over .i2-b.end{opacity:.5;pointer-events:none}
 .call-bg{position:absolute;inset:-60px;background-size:cover;background-position:center;filter:blur(34px) brightness(.42) saturate(1.1)}
 .call-in{position:relative;height:100%;display:flex;flex-direction:column;align-items:center;padding:112px 24px 56px}
 .call-label{font-size:14px;font-weight:600;opacity:.75;letter-spacing:.3px}
@@ -3080,6 +3099,26 @@ function stopRing() {
   CALLST.timers.forEach(clearTimeout); CALLST.timers = [];
   if (CALLST.ctx) { try { CALLST.ctx.close(); } catch (e) {} CALLST.ctx = null; }
 }
+/* 📱 아이폰 전화 거는 화면 (iOS 26 · 회색 배경 + 버튼 6개) */
+const IC_I = {
+  spk: '<svg viewBox="0 0 32 32" fill="currentColor"><path d="M4 12.2h4.6L15 6.6c.7-.6 1.7-.1 1.7.8v17.2c0 .9-1 1.4-1.7.8l-6.4-5.6H4c-.8 0-1.4-.6-1.4-1.4v-4.8c0-.8.6-1.4 1.4-1.4z"/><path d="M20.5 11.6a6 6 0 0 1 0 8.8M23.6 8.6a10.4 10.4 0 0 1 0 14.8M26.6 5.8a14.6 14.6 0 0 1 0 20.4" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"/></svg>',
+  ft: '<svg viewBox="0 0 34 26" fill="currentColor"><rect x="1" y="3" width="22" height="20" rx="4.5"/><path d="M25 10.4l6.2-4.3c.8-.5 1.8 0 1.8 1v11.8c0 1-1 1.5-1.8 1L25 15.6z"/><text x="12" y="18.6" text-anchor="middle" font-size="14" font-weight="700" fill="#5d5d5d" font-family="-apple-system,system-ui,sans-serif">?</text></svg>',
+  mute: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="11.5" y="3.5" width="9" height="15.5" rx="4.5"/><path d="M7.5 14.5a8.5 8.5 0 0 0 17 0M16 23v4.5M11.5 27.5h9"/><path d="M5.5 4.5l21 22" stroke-width="2.4"/></svg>',
+  more: '<svg viewBox="0 0 32 32" fill="currentColor"><circle cx="7" cy="16" r="2.6"/><circle cx="16" cy="16" r="2.6"/><circle cx="25" cy="16" r="2.6"/></svg>',
+  end: '<svg viewBox="0 0 32 32" fill="currentColor"><path d="M16 12.3c-4.4 0-8.5 1.3-11.4 3.5-.8.6-1 1.6-.6 2.5l1.3 2.6c.4.8 1.3 1.2 2.2.9l3.9-1.3c.8-.3 1.3-1 1.3-1.8v-2.1a17 17 0 0 1 6.6 0v2.1c0 .8.5 1.5 1.3 1.8l3.9 1.3c.9.3 1.8-.1 2.2-.9l1.3-2.6c.4-.9.2-1.9-.6-2.5-2.9-2.2-7-3.5-11.4-3.5z"/></svg>',
+  kp: '<svg viewBox="0 0 32 32" fill="currentColor">' + [7, 16, 25].map(y => [7, 16, 25].map(x => `<circle cx="${x}" cy="${y}" r="3.6"/>`).join("")).join("") + '</svg>',
+};
+function iosCallHTML(p, state) {
+  const b = (c, ic, label, cls = "") => `<button class="i2-b ${cls}" data-c="${c}"><span>${ic}</span><em>${label}</em></button>`;
+  return `<div class="call-in i2-in">
+      <div class="call-state i2-state" id="callState">${esc(state)}</div>
+      <div class="i2-name">${esc(p.name)}</div>
+      <div class="i2-grid">
+        ${b("speaker", IC_I.spk, "스피커")}${b("video", IC_I.ft, "FaceTime", "ft")}${b("mute", IC_I.mute, "소리 끔")}
+        ${b("tool", IC_I.more, "더 보기")}${b("end", IC_I.end, "종료", "end")}${b("tool", IC_I.kp, "키패드")}
+      </div>
+    </div>`;
+}
 function openCall(key) {
   const p = typeof key === "object" ? key : C.PEOPLE[key]; if (!p) return;
   CALLST.key = typeof key === "object" ? (key.person || null) : key;
@@ -3090,26 +3129,14 @@ function openCall(key) {
   const ios = typeof key === "object";
   CALLST.kakao = !ios; CALLST.answered = false; CALLST.sec = 0;
   if (!ios) { const rid0 = ROOM_IDS.find(id => C.ROOMS[id].person === CALLST.key); if (rid0) addMsg(rid0, { sender: "user", type: "vcall", ok: true, time: S.clock }); }   // 📞 걸면 바로 '보이스톡' 말풍선
-  box.className = "call on ringing" + (ios ? " ios" : " kv");
-  box.innerHTML = ios ? `
-    <div class="call-bg" style="background-image:url('${cssUrl(p.avatar)}')"></div>
-    <div class="call-in">
-      <div class="call-label">${esc(K.label || "보이스톡")}</div>
-      <div class="call-av">${imgTag(p.avatar, firstChar(p.name))}</div>
-      <div class="call-name">${esc(p.name)}</div>
-      <div class="call-state" id="callState">${esc(K.ringingText || "연결 중")}<span class="dots"><i>.</i><i>.</i><i>.</i></span></div>
-      <div class="call-ctrls">
-        <button data-c="mute"><span>${ICON.mic}</span><span>소리 끄기</span></button>
-        <button data-c="speaker"><span>${ICON.speaker}</span><span>스피커</span></button>
-        <button data-c="video"><span>${ICON.pfVideo}</span><span>영상</span></button>
-      </div>
-      <button class="call-end" data-c="end" aria-label="통화 종료">${ICON.hangup}</button>
-    </div>` : kvHTML(p.name, p.avatar, K.ringingText || "연결 중");
+  box.className = "call on ringing" + (ios ? " ios ios2" : " kv");
+  box.innerHTML = ios ? iosCallHTML(p, "휴대전화 연결 중...") : kvHTML(p.name, p.avatar, K.ringingText || "연결 중");
   box.onclick = e => {
     const b = e.target.closest("[data-c]"); if (!b) return;
     const c = b.dataset.c;
     if (c === "end") endCall(box.classList.contains("live") ? "통화 종료" : K.cancelText || "통화를 취소했습니다", 900);
-    else if (c === "video") toast("영상 통화로 바꿀 수 없어요");
+    else if (c === "video") { if (!box.classList.contains("ios2")) toast("영상 통화로 바꿀 수 없어요"); }
+    else if (c === "tool") return;
     else b.classList.toggle("on");
   };
   if (K.sound !== false) CALLST.ctx = ringback(secs);
@@ -3580,7 +3607,7 @@ async function liveCall(lines, after) {
   if (after) CALLST.after = after;
   const acc = inn.querySelector(".call-acc"); if (acc) acc.remove();
   if (!inn.querySelector(".call-cap")) inn.querySelector(".call-state").insertAdjacentHTML("afterend", '<div class="call-cap" id="callCap"></div>');
-  if (!inn.querySelector(".call-ctrls") && !inn.querySelector(".kv-bar")) inn.insertAdjacentHTML("beforeend", `<div class="call-ctrls">
+  if (!inn.querySelector(".call-ctrls") && !inn.querySelector(".kv-bar") && !inn.querySelector(".i2-grid")) inn.insertAdjacentHTML("beforeend", `<div class="call-ctrls">
       <button data-c="mute"><span>${ICON.mic}</span><span>소리 끄기</span></button>
       <button data-c="speaker"><span>${ICON.speaker}</span><span>스피커</span></button>
       <button data-c="video"><span>${ICON.pfVideo}</span><span>영상</span></button></div>
@@ -5140,9 +5167,10 @@ function renderNotes() {
 function openNote(i) {
   const n = (C.NOTES || [])[i]; if (!n) return;
   const box = $("#ntDetail");
+  const ro = /https?:\/\//.test(`${n.title} ${n.body || ""}`);   // 🔗 링크 메모는 수정 안 되고 누르면 바로 이동
   box.innerHTML = `<div class="ntd-top"><button class="nt-pill" data-nt="back">${NT_BACK}메모</button>
       <span class="rt"><button class="nt-circ" data-nt="tool" aria-label="공유"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M8 7l4-4 4 4"/><path d="M8.5 10H6.5A1.5 1.5 0 0 0 5 11.5v8A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5v-8A1.5 1.5 0 0 0 17.5 10h-2"/></svg></button><button class="nt-circ" data-nt="tool" aria-label="더보기">${ICON.more}</button></span></div>
-    <div class="ntd-body"><div class="ntd-date">${esc(n.date || "")}</div><div class="ntd-title" contenteditable="true" data-ph="제목">${linkify(n.title)}</div><div class="ntd-txt" contenteditable="true" data-ph="메모를 입력하세요">${linkify(n.body || "")}</div></div>
+    <div class="ntd-body"><div class="ntd-date">${esc(n.date || "")}</div><div class="ntd-title" contenteditable="${ro ? "false" : "true"}" data-ph="제목">${linkify(n.title)}</div><div class="ntd-txt" contenteditable="${ro ? "false" : "true"}" data-ph="메모를 입력하세요">${linkify(n.body || "")}</div></div>
     <div class="ntd-tools"><div class="ntd-grp">
       <button data-nt="tool" aria-label="체크리스트"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="7" r="2"/><circle cx="5.5" cy="17" r="2"/><path d="M10 7h10M10 17h10"/></svg></button>
       <button data-nt="tool" aria-label="첨부"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M20 11.5l-8.2 8.2a5 5 0 0 1-7.1-7.1L13 4.3a3.3 3.3 0 0 1 4.7 4.7l-8.3 8.3a1.7 1.7 0 0 1-2.4-2.4l7.6-7.6"/></svg></button>
@@ -5152,7 +5180,7 @@ function openNote(i) {
   box.querySelector(".ntd-body").scrollTop = 0;
   box.dataset.i = i;
   const save = () => { n.title = box.querySelector(".ntd-title").innerText.trim(); n.body = box.querySelector(".ntd-txt").innerText.replace(/\n$/, ""); n.edited = true; saveNotes(); };
-  box.querySelectorAll("[contenteditable]").forEach(el => { el.oninput = save; el.onkeydown = e => { if (e.key === "Enter" && el.classList.contains("ntd-title")) { e.preventDefault(); box.querySelector(".ntd-txt").focus(); } }; });
+  box.querySelectorAll("[contenteditable=true]").forEach(el => { el.oninput = save; el.onkeydown = e => { if (e.key === "Enter" && el.classList.contains("ntd-title")) { e.preventDefault(); box.querySelector(".ntd-txt").focus(); } }; });
   requestAnimationFrame(() => box.classList.add("on"));
   const l = $("#ntList"); if (l.animate) l.animate([{ transform: "none" }, { transform: "translateX(-30%)" }], { duration: 360, easing: IOS });
 }
